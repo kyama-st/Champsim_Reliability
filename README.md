@@ -1,2 +1,2 @@
 # Chapmsim_Reliability
-ライン粒度でのAVF計算用
+ライン粒度のAVFを計算する
