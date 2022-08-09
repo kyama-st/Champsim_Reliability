@@ -20,11 +20,12 @@
 #include <iomanip>
 
 // USEFUL MACROS
-//#define DEBUG_PRINT
+// #define DEBUG_PRINT
 #define SANITY_CHECK
 #define LLC_BYPASS
 #define DRC_BYPASS
 #define NO_CRC2_COMPILE
+#define MY_DEBUG
 
 #ifdef DEBUG_PRINT
 #define DP(x) x
@@ -32,6 +33,11 @@
 #define DP(x)
 #endif
 
+#ifdef MY_DEBUG
+#define MYDP(x) x
+#else
+#define MYDP(x)
+#endif
 // CPU
 #define NUM_CPUS 1
 #define CPU_FREQ 4000
