@@ -1082,6 +1082,7 @@ void O3_CPU::schedule_memory_instruction()
 
     // execution is out-of-order but we have an in-order scheduling algorithm to detect all RAW dependencies
     uint32_t limit = ROB.next_schedule;
+    // ROB.next_scheduleはindex
     num_searched = 0;
     if (ROB.head < limit) {
         for (uint32_t i=ROB.head; i<limit; i++) {
@@ -1440,7 +1441,7 @@ void O3_CPU::operate_lsq()
 {
     // handle store
     uint32_t store_issued = 0, num_iteration = 0;
-
+    //Ready to Store queue 0
     while (store_issued < SQ_WIDTH) {
         if (RTS0[RTS0_head] < SQ_SIZE) {
             uint32_t sq_index = RTS0[RTS0_head];
@@ -1498,6 +1499,7 @@ void O3_CPU::operate_lsq()
             break;
     }
 
+    //Ready to Store quere 1
     num_iteration = 0;
     while (store_issued < SQ_WIDTH) {
         if (RTS1[RTS1_head] < SQ_SIZE) {
@@ -1524,6 +1526,7 @@ void O3_CPU::operate_lsq()
             break;
     }
 
+    //Ready to Load queue 0
     unsigned load_issued = 0;
     num_iteration = 0;
     while (load_issued < LQ_WIDTH) {
@@ -1581,6 +1584,7 @@ void O3_CPU::operate_lsq()
             break;
     }
 
+    //Ready to Load Queue 1
     num_iteration = 0;
     while (load_issued < LQ_WIDTH) {
         if (RTL1[RTL1_head] < LQ_SIZE) {

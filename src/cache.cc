@@ -1,5 +1,5 @@
-#include "inc/cache.h"
-#include "inc/set.h"
+#include "../inc/cache.h"
+#include "../inc/set.h"
 
 uint64_t l2pf_access = 0;
 
@@ -11,7 +11,6 @@ void CACHE::handle_fill()
         return;
 
     if (MSHR.next_fill_cycle <= current_core_cycle[fill_cpu]) {
-
 #ifdef SANITY_CHECK
         if (MSHR.next_fill_index >= MSHR.SIZE)
             assert(0);
@@ -241,7 +240,12 @@ void CACHE::handle_writeback()
         int way = check_hit(&WQ.entry[index]);
         
         if (way >= 0) { // writeback hit (or RFO hit for L1D)
-
+          MYDP ( if (warmup_complete[writeback_cpu] && NAME == "LLC" ) {
+            cout << "[" << NAME << "] " <<  " write hit ";
+            cout << " instr_id: " << WQ.entry[index].instr_id << " address: " << hex << WQ.entry[index].address;
+            cout << " current_cycle " << current_core_cycle[writeback_cpu];
+            cout << " full_addr: " << WQ.entry[index].full_addr << dec << endl; });      
+            
             if (cache_type == IS_LLC) {
                 llc_update_replacement_state(writeback_cpu, set, way, block[set][way].full_addr, WQ.entry[index].ip, 0, WQ.entry[index].type, 1);
 
@@ -294,11 +298,11 @@ void CACHE::handle_writeback()
         }
         else { // writeback miss (or RFO miss for L1D)
             
-            DP ( if (warmup_complete[writeback_cpu]) {
-            cout << "[" << NAME << "] " << __func__ << " type: " << +WQ.entry[index].type << " miss";
+            MYDP ( if (warmup_complete[writeback_cpu] && NAME == "LLC") {
+            cout << "[" << NAME << "] " << "write miss";
             cout << " instr_id: " << WQ.entry[index].instr_id << " address: " << hex << WQ.entry[index].address;
-            cout << " full_addr: " << WQ.entry[index].full_addr << dec;
-            cout << " cycle: " << WQ.entry[index].event_cycle << endl; });
+            cout << " current_cycle " << current_core_cycle[writeback_cpu];
+            cout << " full_addr: " << WQ.entry[index].full_addr << dec << endl; });
 
             if (cache_type == IS_L1D) { // RFO miss
 
@@ -539,6 +543,11 @@ void CACHE::handle_read()
             int way = check_hit(&RQ.entry[index]);
             
             if (way >= 0) { // read hit
+                MYDP ( if (warmup_complete[read_cpu] && NAME == "LLC") {
+                cout << "[" << NAME << "] " << " read hit";
+                cout << " instr_id: " << RQ.entry[index].instr_id << " address: " << hex << RQ.entry[index].address;
+                cout << " current_cycle " << current_core_cycle[read_cpu];
+                cout << " full_addr: " << RQ.entry[index].full_addr << dec << endl; });
 
                 if (cache_type == IS_ITLB) {
                     RQ.entry[index].instruction_pa = block[set][way].data;
@@ -629,11 +638,11 @@ void CACHE::handle_read()
             }
             else { // read miss
 
-                DP ( if (warmup_complete[read_cpu]) {
-                cout << "[" << NAME << "] " << __func__ << " read miss";
+                MYDP ( if (warmup_complete[read_cpu]&& NAME == "LLC") {
+                cout << "[" << NAME << "] " << " read miss";
                 cout << " instr_id: " << RQ.entry[index].instr_id << " address: " << hex << RQ.entry[index].address;
-                cout << " full_addr: " << RQ.entry[index].full_addr << dec;
-                cout << " cycle: " << RQ.entry[index].event_cycle << endl; });
+                cout << " current_cycle " << current_core_cycle[read_cpu];
+                cout << " full_addr: " << RQ.entry[index].full_addr << dec << endl; });
 
                 // check mshr
                 uint8_t miss_handled = 1;

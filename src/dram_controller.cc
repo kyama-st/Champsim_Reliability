@@ -1,4 +1,4 @@
-#include "dram_controller.h"
+#include "../inc/dram_controller.h"
 
 // initialized in main.cc
 uint32_t DRAM_MTPS, DRAM_DBUS_RETURN_TIME,
@@ -68,6 +68,9 @@ void MEMORY_CONTROLLER::reset_remain_requests(PACKET_QUEUE *queue, uint32_t chan
 
 void MEMORY_CONTROLLER::operate()
 {
+    // cout << endl;
+    // cout << "memory operate " << endl; 
+
     for (uint32_t i=0; i<DRAM_CHANNELS; i++) {
         //if ((write_mode[i] == 0) && (WQ[i].occupancy >= DRAM_WRITE_HIGH_WM)) {
       if ((write_mode[i] == 0) && ((WQ[i].occupancy >= DRAM_WRITE_HIGH_WM) || ((RQ[i].occupancy == 0) && (WQ[i].occupancy > 0)))) { // use idle cycles to perform writes
@@ -122,13 +125,16 @@ void MEMORY_CONTROLLER::operate()
 
 void MEMORY_CONTROLLER::schedule(PACKET_QUEUE *queue)
 {
+    // cout << endl; 
+    // cout << " memory schedule " << endl; 
+
     uint64_t read_addr;
     uint32_t read_channel, read_rank, read_bank, read_row;
     uint8_t  row_buffer_hit = 0;
 
     int oldest_index = -1;
     uint64_t oldest_cycle = UINT64_MAX;
-
+    
     // first, search for the oldest open row hit
     for (uint32_t i=0; i<queue->SIZE; i++) {
 
@@ -229,7 +235,7 @@ void MEMORY_CONTROLLER::schedule(PACKET_QUEUE *queue)
                  op_rank = dram_get_rank(op_addr), 
                  op_bank = dram_get_bank(op_addr), 
                  op_row = dram_get_row(op_addr);
-#ifdef DEBUG_PRINT
+#ifdef MY_DEBUG 
         uint32_t op_column = dram_get_column(op_addr);
 #endif
 
@@ -285,7 +291,7 @@ void MEMORY_CONTROLLER::process(PACKET_QUEUE *queue)
              op_channel = dram_get_channel(op_addr), 
              op_rank = dram_get_rank(op_addr), 
              op_bank = dram_get_bank(op_addr);
-#ifdef DEBUG_PRINT
+#ifdef MY_DEBUG 
     uint32_t op_row = dram_get_row(op_addr), 
              op_column = dram_get_column(op_addr);
 #endif
@@ -318,18 +324,26 @@ void MEMORY_CONTROLLER::process(PACKET_QUEUE *queue)
                 bank_request[op_channel][op_rank][op_bank].is_read = 0;
 
                 scheduled_writes[op_channel]--;
+                // MYDP ( if (warmup_complete[op_cpu]) {
+                // cout << "[" << queue->NAME << "] " <<  __func__  << " instr_id: " << queue->entry[request_index].instr_id;
+                // cout << " address: " << queue->entry[request_index].address << " full_addr: " << queue->entry[request_index].full_addr << dec;
+                // cout << " WQ row buffer hit " << queue->ROW_BUFFER_HIT;
+                // cout << " occupancy: " << queue->occupancy << " channel: " << op_channel << " rank: " << op_rank << " bank: " << op_bank;
+                // cout << " row: " << op_row << " column: " << op_column;
+                // cout << " current_cycle: " << current_core_cycle[op_cpu] << " event_cycle: " << queue->entry[request_index].event_cycle << endl; });
+                
+                MYDP ( if (warmup_complete[op_cpu]) {
+                cout << "[" << queue->NAME << "] " <<  __func__  << " instr_id: " << queue->entry[request_index].instr_id;
+                cout << " address: " << queue->entry[request_index].address << " full_addr: " << queue->entry[request_index].full_addr << dec;
+                cout << " WQ row buffer hit " << queue->ROW_BUFFER_HIT;
+                cout << " current_cycle: " << current_core_cycle[op_cpu] << endl; });
+
             } else {
                 // update data bus cycle time
                 dbus_cycle_available[op_channel] = current_core_cycle[op_cpu] + DRAM_DBUS_RETURN_TIME;
                 queue->entry[request_index].event_cycle = dbus_cycle_available[op_channel]; 
 
-                DP ( if (warmup_complete[op_cpu]) {
-                cout << "[" << queue->NAME << "] " <<  __func__ << " return data" << hex;
-                cout << " address: " << queue->entry[request_index].address << " full_addr: " << queue->entry[request_index].full_addr << dec;
-                cout << " occupancy: " << queue->occupancy << " channel: " << op_channel << " rank: " << op_rank << " bank: " << op_bank;
-                cout << " row: " << op_row << " column: " << op_column;
-                cout << " current_cycle: " << current_core_cycle[op_cpu] << " event_cycle: " << queue->entry[request_index].event_cycle << endl; });
-
+                
                 // send data back to the core cache hierarchy
                 upper_level_dcache[op_cpu]->return_data(&queue->entry[request_index]);
 
@@ -346,7 +360,21 @@ void MEMORY_CONTROLLER::process(PACKET_QUEUE *queue)
                 bank_request[op_channel][op_rank][op_bank].is_read = 0;
 
                 scheduled_reads[op_channel]--;
-            }
+                
+                // MYDP ( if (warmup_complete[op_cpu]) {
+                // cout << "[" << queue->NAME << "] " <<  __func__ << " instr_id: " << queue->entry[request_index].instr_id;
+                // cout << " address: " << queue->entry[request_index].address << " full_addr: " << queue->entry[request_index].full_addr << dec;
+                // cout << " RQ row buffer hit " << queue->ROW_BUFFER_HIT;
+                // cout << " occupancy: " << queue->occupancy << " channel: " << op_channel << " rank: " << op_rank << " bank: " << op_bank;
+                // cout << " row: " << op_row << " column: " << op_column;
+                // cout << " current_cycle: " << current_core_cycle[op_cpu] << " event_cycle: " << queue->entry[request_index].event_cycle << endl; });
+                MYDP ( if (warmup_complete[op_cpu]) {
+                cout << "[" << queue->NAME << "] " <<  __func__ << " instr_id: " << queue->entry[request_index].instr_id;
+                cout << " address: " << queue->entry[request_index].address << " full_addr: " << queue->entry[request_index].full_addr << dec;
+                cout << " RQ row buffer hit " << queue->ROW_BUFFER_HIT;
+                cout << " current_cycle: " << current_core_cycle[op_cpu] << endl; });
+
+}
 
             // remove the oldest entry
             queue->remove_queue(&queue->entry[request_index]);
