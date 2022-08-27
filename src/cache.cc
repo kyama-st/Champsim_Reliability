@@ -240,12 +240,16 @@ void CACHE::handle_writeback()
         int way = check_hit(&WQ.entry[index]);
         
         if (way >= 0) { // writeback hit (or RFO hit for L1D)
-          MYDP ( if (warmup_complete[writeback_cpu] && NAME == "LLC" ) {
-            cout << "[" << NAME << "] " <<  " write hit ";
-            cout << " instr_id: " << WQ.entry[index].instr_id << " address: " << hex << WQ.entry[index].address;
-            cout << " current_cycle " << current_core_cycle[writeback_cpu];
-            cout << " full_addr: " << WQ.entry[index].full_addr << dec << endl; });      
-            
+          //back up
+          // MYDP ( if (warmup_complete[writeback_cpu] && NAME == "LLC" ) {
+          //   cout << "[" << NAME << "] " <<  " write-hit ";
+          //   cout << " instr_id: " << WQ.entry[index].instr_id << " address: " << hex << WQ.entry[index].address;
+          //   cout << " current_cycle " << current_core_cycle[writeback_cpu];
+          //   cout << " full_addr: " << WQ.entry[index].full_addr << dec << endl; });      
+          int RorW = 1;
+          int hit = 1;
+          print_status(writeback_cpu, index, RorW, hit);
+
             if (cache_type == IS_LLC) {
                 llc_update_replacement_state(writeback_cpu, set, way, block[set][way].full_addr, WQ.entry[index].ip, 0, WQ.entry[index].type, 1);
 
@@ -297,12 +301,16 @@ void CACHE::handle_writeback()
             WQ.remove_queue(&WQ.entry[index]);
         }
         else { // writeback miss (or RFO miss for L1D)
-            
-            MYDP ( if (warmup_complete[writeback_cpu] && NAME == "LLC") {
-            cout << "[" << NAME << "] " << "write miss";
-            cout << " instr_id: " << WQ.entry[index].instr_id << " address: " << hex << WQ.entry[index].address;
-            cout << " current_cycle " << current_core_cycle[writeback_cpu];
-            cout << " full_addr: " << WQ.entry[index].full_addr << dec << endl; });
+
+            //backup 
+            // MYDP ( if (warmup_complete[writeback_cpu] && NAME == "LLC") {
+            // cout << "[" << NAME << "] " << "write-miss";
+            // cout << " instr_id: " << WQ.entry[index].instr_id << " address: " << hex << WQ.entry[index].address;
+            // cout << " current_cycle " << current_core_cycle[writeback_cpu];
+            // cout << " full_addr: " << WQ.entry[index].full_addr << dec << endl; });
+            int RorW = 1;
+            int hit = 0;
+            print_status(writeback_cpu, index, RorW, hit);
 
             if (cache_type == IS_L1D) { // RFO miss
 
@@ -543,11 +551,15 @@ void CACHE::handle_read()
             int way = check_hit(&RQ.entry[index]);
             
             if (way >= 0) { // read hit
-                MYDP ( if (warmup_complete[read_cpu] && NAME == "LLC") {
-                cout << "[" << NAME << "] " << " read hit";
-                cout << " instr_id: " << RQ.entry[index].instr_id << " address: " << hex << RQ.entry[index].address;
-                cout << " current_cycle " << current_core_cycle[read_cpu];
-                cout << " full_addr: " << RQ.entry[index].full_addr << dec << endl; });
+                // backup
+                // MYDP ( if (warmup_complete[read_cpu] && NAME == "LLC") {
+                // cout << "[" << NAME << "] " << " read-hit";
+                // cout << " instr_id: " << RQ.entry[index].instr_id << " address: " << hex << RQ.entry[index].address;
+                // cout << " current_cycle " << current_core_cycle[read_cpu];
+                // cout << " full_addr: " << RQ.entry[index].full_addr << dec << endl; });
+                int RorW = 0;
+                int hit = 1;
+                print_status(read_cpu, index, RorW, hit);
 
                 if (cache_type == IS_ITLB) {
                     RQ.entry[index].instruction_pa = block[set][way].data;
@@ -637,61 +649,62 @@ void CACHE::handle_read()
 		reads_available_this_cycle--;
             }
             else { // read miss
-
-                MYDP ( if (warmup_complete[read_cpu]&& NAME == "LLC") {
-                cout << "[" << NAME << "] " << " read miss";
-                cout << " instr_id: " << RQ.entry[index].instr_id << " address: " << hex << RQ.entry[index].address;
-                cout << " current_cycle " << current_core_cycle[read_cpu];
-                cout << " full_addr: " << RQ.entry[index].full_addr << dec << endl; });
-
+                //back up
+                // MYDP ( if (warmup_complete[read_cpu]&& NAME == "LLC") {
+                // cout << "[" << NAME << "] " << " read-miss";
+                // cout << " instr_id: " << RQ.entry[index].instr_id << " address: " << hex << RQ.entry[index].address;
+                // cout << " current_cycle " << current_core_cycle[read_cpu];
+                // cout << " full_addr: " << RQ.entry[index].full_addr << dec << endl; });
+                int RorW = 0;
+                int hit = 0;
+                print_status(read_cpu, index, RorW, hit);
                 // check mshr
                 uint8_t miss_handled = 1;
                 int mshr_index = check_mshr(&RQ.entry[index]);
 
-		if(mshr_index == -2)
-		  {
-		    // this is a data/instruction collision in the MSHR, so we have to wait before we can allocate this miss
-		    miss_handled = 0;
-		  }
-                else if ((mshr_index == -1) && (MSHR.occupancy < MSHR_SIZE)) { // this is a new miss
+		          if(mshr_index == -2){
+                // this is a data/instruction collision in the MSHR, so we have to wait before we can allocate this miss
+                miss_handled = 0;
+              }
+              else if ((mshr_index == -1) && (MSHR.occupancy < MSHR_SIZE)) { // this is a new miss
 
-		  if(cache_type == IS_LLC)
-		    {
-		      // check to make sure the DRAM RQ has room for this LLC read miss
-		      if (lower_level->get_occupancy(1, RQ.entry[index].address) == lower_level->get_size(1, RQ.entry[index].address))
-			{
-			  miss_handled = 0;
-			}
-		      else
-			{
-			  add_mshr(&RQ.entry[index]);
-			  if(lower_level)
-			    {
-			      lower_level->add_rq(&RQ.entry[index]);
-			    }
-			}
-		    }
-		  else
-		    {
-		      // add it to mshr (read miss)
-		      add_mshr(&RQ.entry[index]);
-		      
-		      // add it to the next level's read queue
-		      if (lower_level)
-                        lower_level->add_rq(&RQ.entry[index]);
-		      else { // this is the last level
-                        if (cache_type == IS_STLB) {
-			  // TODO: need to differentiate page table walk and actual swap
-			  
-			  // emulate page table walk
-			  uint64_t pa = va_to_pa(read_cpu, RQ.entry[index].instr_id, RQ.entry[index].full_addr, RQ.entry[index].address, 0);
-			  
-			  RQ.entry[index].data = pa >> LOG2_PAGE_SIZE; 
-			  RQ.entry[index].event_cycle = current_core_cycle[read_cpu];
-			  return_data(&RQ.entry[index]);
-                        }
-		      }
-		    }
+                if(cache_type == IS_LLC)
+                  {
+                    // check to make sure the DRAM RQ has room for this LLC read miss
+                    if (lower_level->get_occupancy(1, RQ.entry[index].address) == lower_level->get_size(1, RQ.entry[index].address))
+                {
+                  miss_handled = 0;
+                }
+                    else
+                {
+                  add_mshr(&RQ.entry[index]);
+                  if(lower_level)
+                    {
+                      lower_level->add_rq(&RQ.entry[index]);
+                    }
+                }
+                  }
+                else
+                  {
+                    // add it to mshr (read miss)
+                    add_mshr(&RQ.entry[index]);
+                    
+                    // add it to the next level's read queue
+                    if (lower_level)
+                                  lower_level->add_rq(&RQ.entry[index]);
+                    else { // this is the last level
+                                  if (cache_type == IS_STLB) {
+                  // TODO: need to differentiate page table walk and actual swap
+                  
+                  // emulate page table walk
+                  uint64_t pa = va_to_pa(read_cpu, RQ.entry[index].instr_id, RQ.entry[index].full_addr, RQ.entry[index].address, 0);
+                  
+                  RQ.entry[index].data = pa >> LOG2_PAGE_SIZE; 
+                  RQ.entry[index].event_cycle = current_core_cycle[read_cpu];
+                  return_data(&RQ.entry[index]);
+                                  }
+                    }
+                  }
                 }
                 else {
                     if ((mshr_index == -1) && (MSHR.occupancy == MSHR_SIZE)) { // not enough MSHR resource
@@ -1759,4 +1772,34 @@ uint32_t CACHE::get_size(uint8_t queue_type, uint64_t address)
 void CACHE::increment_WQ_FULL(uint64_t address)
 {
     WQ.FULL++;
+}
+
+void CACHE::print_status(uint32_t op_cpu, int index, int RorW, int hit)
+{
+  if(RorW){
+    //write
+    DP ( if (warmup_complete[op_cpu] && NAME == "LLC") {
+                // cout << "\"" << WQ.entry[index].address << "\": " ;
+                cout << "{ " ;
+                cout << " \"Mem\": " << "\""<< NAME << "\"" ;
+                cout << ", \"Address\": " << WQ.entry[index].address;
+                cout << ", \"R/W\": " << "\"Write\"";
+                cout << ", \"Hit\":" << hit;
+                cout << ", \"Cycle\": " << current_core_cycle[op_cpu] ;
+                cout << ", \"Instr_id\": " << WQ.entry[index].instr_id ;
+                cout << ", \"Full_addr\": " << WQ.entry[index].full_addr << dec << "},"<< endl; });
+  }else{
+    //read
+    DP ( if (warmup_complete[op_cpu] && NAME == "LLC") {
+                // cout << "\"" << RQ.entry[index].address << "\":" ;
+                cout << "{ " ;
+                cout << " \"Mem\": " << "\""<< NAME << "\"" ;
+                cout << ", \"Address\": " << RQ.entry[index].address;
+                cout << ", \"R/W\": " << "\"Read\"";
+                cout << ", \"Hit\":" << hit;
+                cout << ", \"Cycle\": " << current_core_cycle[op_cpu] ;
+                cout << ", \"Instr_id\": " << RQ.entry[index].instr_id ;
+                cout << ", \"Full_addr\": " << RQ.entry[index].full_addr << dec << "},"<< endl; });
+  }
+        
 }

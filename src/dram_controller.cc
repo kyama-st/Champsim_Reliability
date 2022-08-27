@@ -333,10 +333,14 @@ void MEMORY_CONTROLLER::process(PACKET_QUEUE *queue)
                 // cout << " current_cycle: " << current_core_cycle[op_cpu] << " event_cycle: " << queue->entry[request_index].event_cycle << endl; });
                 
                 MYDP ( if (warmup_complete[op_cpu]) {
-                cout << "[" << queue->NAME << "] " <<  __func__  << " instr_id: " << queue->entry[request_index].instr_id;
-                cout << " address: " << queue->entry[request_index].address << " full_addr: " << queue->entry[request_index].full_addr << dec;
-                cout << " WQ row buffer hit " << queue->ROW_BUFFER_HIT;
-                cout << " current_cycle: " << current_core_cycle[op_cpu] << endl; });
+                // cout << "\"" << queue->entry[request_index].address << "\": " ;
+                cout << "{ " ;
+                cout << " \"Mem\": " << "\""<< queue -> NAME << "\"" ;
+                cout << ", \"Address\": " << queue->entry[request_index].address;
+                cout << ", \"R/W\": " << "\"Write\"";
+                cout << ", \"Cycle\": " << current_core_cycle[op_cpu] ;
+                cout << ", \"Instr_id\": " << queue->entry[request_index].instr_id ;
+                cout << ", \"Full_addr\": " << queue->entry[request_index].full_addr << dec << "},"<< endl; });
 
             } else {
                 // update data bus cycle time
@@ -369,10 +373,14 @@ void MEMORY_CONTROLLER::process(PACKET_QUEUE *queue)
                 // cout << " row: " << op_row << " column: " << op_column;
                 // cout << " current_cycle: " << current_core_cycle[op_cpu] << " event_cycle: " << queue->entry[request_index].event_cycle << endl; });
                 MYDP ( if (warmup_complete[op_cpu]) {
-                cout << "[" << queue->NAME << "] " <<  __func__ << " instr_id: " << queue->entry[request_index].instr_id;
-                cout << " address: " << queue->entry[request_index].address << " full_addr: " << queue->entry[request_index].full_addr << dec;
-                cout << " RQ row buffer hit " << queue->ROW_BUFFER_HIT;
-                cout << " current_cycle: " << current_core_cycle[op_cpu] << endl; });
+                // cout << "\"" << queue->entry[request_index].address << "\": " ;
+                cout << "{ " ;
+                cout << " \"Mem\": " << "\""<< queue -> NAME << "\"" ;
+                cout << ", \"Address\": " << queue->entry[request_index].address;
+                cout << ", \"R/W\": " << "\"Read\"";
+                cout << ", \"Cycle\": " << current_core_cycle[op_cpu] ;
+                cout << ", \"Instr_id\": " << queue->entry[request_index].instr_id ;
+                cout << ", \"Full_addr\": " << queue->entry[request_index].full_addr << dec << "},"<< endl; });
 
 }
 

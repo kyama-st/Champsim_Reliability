@@ -208,7 +208,8 @@ class CACHE : public MEMORY {
          //prefetcher_final_stats(),
          l1d_prefetcher_final_stats(),
          l2c_prefetcher_final_stats(),
-         llc_prefetcher_final_stats();
+         llc_prefetcher_final_stats(), 
+         print_status(uint32_t op_cpu, int index, int RorW, int hit);
     void (*l1i_prefetcher_cache_operate)(uint32_t, uint64_t, uint8_t, uint8_t);
     void (*l1i_prefetcher_cache_fill)(uint32_t, uint64_t, uint32_t, uint32_t, uint8_t, uint64_t);
 

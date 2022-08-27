@@ -1,15 +1,28 @@
-# MEMO
+<p align="center">
+  <h1 align="center"> コマンドリスト </h1>
+  <p> シミュレーションのコマンドや気をつけるべきことのメモ。 
+</p>
 
-adress; 172d077208b
-read miss: 77338 = 488248
-write hit: 877af7 = 8878839 
-read hit: dc768e = 14448270
+# シミュレーション実行からAVF算出まで
+トレースの取得
+```
+$ cd scripts
+$ ./download_dpc3_traces.sh
+```
 
-write -> read is ACE
+Champsimのビルドとシミュレーション実行
+```
+$ ./run_command.sh
+```
 
-warmup all 464596 = 4605334
-all 18610752 = 409012050 
+Champsimのシミュレーション結果から、jsonファイルを作成する。このコマンドはシミュレーション実行用のシェルスクリプトと結合予定。
+```
+$ ./run_txt2csv.sh
+```
 
-409012050
-AVF = 0.13 ()
-( write hit - read hit ) / (warmup + all )
+jsonファイルからpythonファイルの実行
+```
+$ python AVF_graph.py
+```
+
+
