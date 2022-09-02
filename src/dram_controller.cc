@@ -324,7 +324,7 @@ void MEMORY_CONTROLLER::process(PACKET_QUEUE *queue)
                 bank_request[op_channel][op_rank][op_bank].is_read = 0;
 
                 scheduled_writes[op_channel]--;
-                // MYDP ( if (warmup_complete[op_cpu]) {
+                // DP ( if (warmup_complete[op_cpu]) {
                 // cout << "[" << queue->NAME << "] " <<  __func__  << " instr_id: " << queue->entry[request_index].instr_id;
                 // cout << " address: " << queue->entry[request_index].address << " full_addr: " << queue->entry[request_index].full_addr << dec;
                 // cout << " WQ row buffer hit " << queue->ROW_BUFFER_HIT;
@@ -332,13 +332,15 @@ void MEMORY_CONTROLLER::process(PACKET_QUEUE *queue)
                 // cout << " row: " << op_row << " column: " << op_column;
                 // cout << " current_cycle: " << current_core_cycle[op_cpu] << " event_cycle: " << queue->entry[request_index].event_cycle << endl; });
                 
+                uint64_t page = queue->entry[request_index].full_addr >> LOG2_PAGE_SIZE;
                 MYDP ( if (warmup_complete[op_cpu]) {
                 // cout << "\"" << queue->entry[request_index].address << "\": " ;
                 cout << "{ " ;
                 cout << " \"Mem\": " << "\""<< queue -> NAME << "\"" ;
                 cout << ", \"Address\": " << queue->entry[request_index].address;
                 cout << ", \"R/W\": " << "\"Write\"";
-                cout << ", \"Cycle\": " << current_core_cycle[op_cpu] ;
+                cout << ", \"Page\": " << page;
+                cout << ", \"Cycle\": " << dbus_cycle_available[op_channel] ;
                 cout << ", \"Instr_id\": " << queue->entry[request_index].instr_id ;
                 cout << ", \"Full_addr\": " << queue->entry[request_index].full_addr << dec << "},"<< endl; });
 
@@ -372,13 +374,16 @@ void MEMORY_CONTROLLER::process(PACKET_QUEUE *queue)
                 // cout << " occupancy: " << queue->occupancy << " channel: " << op_channel << " rank: " << op_rank << " bank: " << op_bank;
                 // cout << " row: " << op_row << " column: " << op_column;
                 // cout << " current_cycle: " << current_core_cycle[op_cpu] << " event_cycle: " << queue->entry[request_index].event_cycle << endl; });
+                uint64_t page = queue->entry[request_index].full_addr >> LOG2_PAGE_SIZE;
+
                 MYDP ( if (warmup_complete[op_cpu]) {
                 // cout << "\"" << queue->entry[request_index].address << "\": " ;
                 cout << "{ " ;
                 cout << " \"Mem\": " << "\""<< queue -> NAME << "\"" ;
                 cout << ", \"Address\": " << queue->entry[request_index].address;
                 cout << ", \"R/W\": " << "\"Read\"";
-                cout << ", \"Cycle\": " << current_core_cycle[op_cpu] ;
+                cout << ", \"Page\": " << page;
+                cout << ", \"Cycle\": " << dbus_cycle_available[op_channel] ;
                 cout << ", \"Instr_id\": " << queue->entry[request_index].instr_id ;
                 cout << ", \"Full_addr\": " << queue->entry[request_index].full_addr << dec << "},"<< endl; });
 
@@ -502,7 +507,7 @@ int MEMORY_CONTROLLER::add_rq(PACKET *packet)
             RQ[channel].entry[index] = *packet;
             RQ[channel].occupancy++;
 
-#ifdef DEBUG_PRINT
+#ifdef MY_DEBUG
             uint32_t channel = dram_get_channel(packet->address),
                      rank = dram_get_rank(packet->address),
                      bank = dram_get_bank(packet->address),
@@ -544,7 +549,7 @@ int MEMORY_CONTROLLER::add_wq(PACKET *packet)
             WQ[channel].entry[index] = *packet;
             WQ[channel].occupancy++;
 
-#ifdef DEBUG_PRINT
+#ifdef MY_DEBUG
             uint32_t channel = dram_get_channel(packet->address),
                      rank = dram_get_rank(packet->address),
                      bank = dram_get_bank(packet->address),

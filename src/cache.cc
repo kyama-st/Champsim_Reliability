@@ -1342,9 +1342,12 @@ int CACHE::add_rq(PACKET *packet)
     if (RQ.tail >= RQ.SIZE)
         RQ.tail = 0;
 
+    // uint64_t page = RQ.entry[index].full_addr >> LOG2_PAGE_SIZE;
+
     DP ( if (warmup_complete[RQ.entry[index].cpu]) {
     cout << "[" << NAME << "_RQ] " <<  __func__ << " instr_id: " << RQ.entry[index].instr_id << " address: " << hex << RQ.entry[index].address;
-    cout << " full_addr: " << RQ.entry[index].full_addr << dec;
+    cout << " full_addr: " << RQ.entry[index].full_addr << hex;
+    cout << " page: " << page;
     cout << " type: " << +RQ.entry[index].type << " head: " << RQ.head << " tail: " << RQ.tail << " occupancy: " << RQ.occupancy;
     cout << " event: " << RQ.entry[index].event_cycle << " current: " << current_core_cycle[RQ.entry[index].cpu] << endl; });
 
