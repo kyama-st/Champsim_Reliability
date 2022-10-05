@@ -1,11 +1,11 @@
-#include "ooo_cpu.h"
+#include "../inc/ooo_cpu.h"
 
 #include <algorithm>
 #include <vector>
 
-#include "cache.h"
-#include "champsim.h"
-#include "instruction.h"
+#include "../inc/cache.h"
+#include "../inc/champsim.h"
+#include "../inc/instruction.h"
 
 #define DEADLOCK_CYCLE 1000000
 

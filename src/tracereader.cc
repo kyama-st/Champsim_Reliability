@@ -1,4 +1,4 @@
-#include "tracereader.h"
+#include "../inc/tracereader.h"
 
 #include <cassert>
 #include <cstdio>

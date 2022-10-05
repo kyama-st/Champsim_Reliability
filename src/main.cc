@@ -8,14 +8,14 @@
 #include <string.h>
 #include <vector>
 
-#include "cache.h"
-#include "champsim.h"
-#include "champsim_constants.h"
-#include "dram_controller.h"
-#include "ooo_cpu.h"
-#include "operable.h"
-#include "tracereader.h"
-#include "vmem.h"
+#include "../inc/cache.h"
+#include "../inc/champsim.h"
+#include "../inc/champsim_constants.h"
+#include "../inc/dram_controller.h"
+#include "../inc/ooo_cpu.h"
+#include "../inc/operable.h"
+#include "../inc/tracereader.h"
+#include "../inc/vmem.h"
 
 uint8_t warmup_complete[NUM_CPUS] = {}, simulation_complete[NUM_CPUS] = {}, all_warmup_complete = 0, all_simulation_complete = 0,
         MAX_INSTR_DESTINATIONS = NUM_INSTR_DESTINATIONS, knob_cloudsuite = 0, knob_low_bandwidth = 0;

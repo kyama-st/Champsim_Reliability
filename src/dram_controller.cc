@@ -1,9 +1,9 @@
-#include "dram_controller.h"
+#include "../inc/dram_controller.h"
 
 #include <algorithm>
 
-#include "champsim_constants.h"
-#include "util.h"
+#include "../inc/champsim_constants.h"
+#include "../inc/util.h"
 
 extern uint8_t all_warmup_complete;
 

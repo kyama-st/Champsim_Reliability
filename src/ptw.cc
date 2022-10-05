@@ -1,8 +1,8 @@
-#include "ptw.h"
+#include "../inc/ptw.h"
 
-#include "champsim.h"
-#include "util.h"
-#include "vmem.h"
+#include "../inc/champsim.h"
+#include "../inc/util.h"
+#include "../inc/vmem.h"
 
 extern VirtualMemory vmem;
 extern uint8_t warmup_complete[NUM_CPUS];

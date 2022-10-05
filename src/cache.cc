@@ -1,12 +1,12 @@
-#include "cache.h"
+#include "../inc/cache.h"
 
 #include <algorithm>
 #include <iterator>
 
-#include "champsim.h"
-#include "champsim_constants.h"
-#include "util.h"
-#include "vmem.h"
+#include "../inc/champsim.h"
+#include "../inc/champsim_constants.h"
+#include "../inc/util.h"
+#include "../inc/vmem.h"
 
 #ifndef SANITY_CHECK
 #define NDEBUG
