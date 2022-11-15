@@ -65,7 +65,7 @@ void print_roi_stats(uint32_t cpu, CACHE* cache)
     TOTAL_MISS += cache->roi_miss[cpu][i];
   }
 
-  if (TOTAL_ACCESS > 0) {
+  if (TOTAL_ACCESS > 0 && cache->NAME == "LLC") {
     cout << cache->NAME;
     cout << " TOTAL     ACCESS: " << setw(10) << TOTAL_ACCESS << "  HIT: " << setw(10) << TOTAL_HIT << "  MISS: " << setw(10) << TOTAL_MISS << endl;
 
@@ -111,7 +111,7 @@ void print_sim_stats(uint32_t cpu, CACHE* cache)
     TOTAL_MISS += cache->sim_miss[cpu][i];
   }
 
-  if (TOTAL_ACCESS > 0) {
+  if (TOTAL_ACCESS > 0 && cache->NAME == "LLC") {
     cout << cache->NAME;
     cout << " TOTAL     ACCESS: " << setw(10) << TOTAL_ACCESS << "  HIT: " << setw(10) << TOTAL_HIT << "  MISS: " << setw(10) << TOTAL_MISS << endl;
 
@@ -433,9 +433,9 @@ int main(int argc, char** argv)
           cumulative_ipc = (1.0 * ooo_cpu[i]->num_retired) / ooo_cpu[i]->current_cycle;
         float heartbeat_ipc = (1.0 * ooo_cpu[i]->num_retired - ooo_cpu[i]->last_sim_instr) / (ooo_cpu[i]->current_cycle - ooo_cpu[i]->last_sim_cycle);
 
-        cout << "Heartbeat CPU " << i << " instructions: " << ooo_cpu[i]->num_retired << " cycles: " << ooo_cpu[i]->current_cycle;
-        cout << " heartbeat IPC: " << heartbeat_ipc << " cumulative IPC: " << cumulative_ipc;
-        cout << " (Simulation time: " << elapsed_hour << " hr " << elapsed_minute << " min " << elapsed_second << " sec) " << endl;
+        // cout << "Heartbeat CPU " << i << " instructions: " << ooo_cpu[i]->num_retired << " cycles: " << ooo_cpu[i]->current_cycle;
+        // cout << " heartbeat IPC: " << heartbeat_ipc << " cumulative IPC: " << cumulative_ipc;
+        // cout << " (Simulation time: " << elapsed_hour << " hr " << elapsed_minute << " min " << elapsed_second << " sec) " << endl;
         ooo_cpu[i]->next_print_instruction += STAT_PRINTING_PERIOD;
 
         ooo_cpu[i]->last_sim_instr = ooo_cpu[i]->num_retired;
@@ -508,5 +508,7 @@ int main(int argc, char** argv)
   print_branch_stats();
 #endif
 
+  cout << "finish_sim_cycles: " << ooo_cpu[0]->finish_sim_cycle << endl;
+  cout << "begin_sim_cycles: " << ooo_cpu[0]->begin_sim_cycle << endl;
   return 0;
 }

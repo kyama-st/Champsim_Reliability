@@ -1,7 +1,7 @@
 #include "../inc/dram_controller.h"
 
 #include <algorithm>
-
+#include "../inc/champsim.h"
 #include "../inc/champsim_constants.h"
 #include "../inc/util.h"
 
@@ -26,6 +26,7 @@ void MEMORY_CONTROLLER::operate()
 
       *channel.active_request->pkt = {};
       channel.active_request = std::end(channel.bank_request);
+      //cycleのログをとる。
     }
 
     // Check queue occupancy
@@ -78,6 +79,21 @@ void MEMORY_CONTROLLER::operate()
           channel.WQ_ROW_BUFFER_MISS++;
         else
           channel.RQ_ROW_BUFFER_MISS++;
+
+        uint64_t page =channel.active_request->pkt->address >> LOG2_PAGE_SIZE;
+        std::string RorW = (channel.write_mode)? "Write" : "Read" ;
+
+        MYDP (if (warmup_complete[channel.active_request->pkt->cpu]) {
+        // cout << "\"" << queue->entry[request_index].address << "\": " ;
+        cout << "{ " ;
+        cout << " \"Mem\": " << "\""<< "DRAM" << "\"" ;
+        cout << ", \"Address\": " << channel.active_request->pkt->address;
+        cout << ", \"R/W\": " << "\"" << RorW << "\"";
+        cout << ", \"Page\": " << page;
+        cout << ", \"Cycle\": " << channel.active_request->event_cycle ;
+        cout << ", \"V_addr\": " <<  channel.active_request->pkt->address<< dec << "},"<< endl; });
+
+
       } else {
         // Bus is congested
         if (channel.active_request != std::end(channel.bank_request))
@@ -110,6 +126,7 @@ void MEMORY_CONTROLLER::operate()
         iter_next_schedule->scheduled = true;
         iter_next_schedule->event_cycle = std::numeric_limits<uint64_t>::max();
       }
+      // cycleのログをとる？
     }
   }
 }

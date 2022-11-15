@@ -9,16 +9,23 @@
 #include "champsim_constants.h"
 
 // USEFUL MACROS
-//#define DEBUG_PRINT
+// #define DEBUG_PRINT
 #define SANITY_CHECK
 #define LLC_BYPASS
 #define DRC_BYPASS
 #define NO_CRC2_COMPILE
+#define MYDEBUG
 
 #ifdef DEBUG_PRINT
 #define DP(x) x
 #else
 #define DP(x)
+#endif
+
+#ifdef MYDEBUG
+#define MYDP(x) x
+#else
+#define MYDP(x)
 #endif
 
 // CACHE
