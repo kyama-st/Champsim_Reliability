@@ -25,6 +25,8 @@ VirtualMemory::VirtualMemory(uint64_t capacity, uint64_t pg_size, uint32_t page_
 
   next_pte_page = ppage_free_list.front();
   ppage_free_list.pop_front();
+  // initialize vpage count
+  vpage_count = 0;
 }
 
 uint64_t VirtualMemory::shamt(uint32_t level) const { return LOG2_PAGE_SIZE + lg2(page_size / PTE_BYTES) * (level); }
@@ -38,7 +40,7 @@ std::pair<uint64_t, bool> VirtualMemory::va_to_pa(uint32_t cpu_num, uint64_t vad
   // this vpage doesn't yet have a ppage mapping
   if (fault)
     ppage_free_list.pop_front();
-
+  vpage_count ++; 
   return {splice_bits(ppage->second, vaddr, LOG2_PAGE_SIZE), fault};
 }
 

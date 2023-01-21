@@ -22,6 +22,7 @@ public:
   const uint64_t minor_fault_penalty;
   const uint32_t pt_levels;
   const uint32_t page_size; // Size of a PTE page
+  uint32_t vpage_count;
   std::deque<uint64_t> ppage_free_list;
 
   // capacity and pg_size are measured in bytes, and capacity must be a multiple

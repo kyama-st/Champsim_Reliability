@@ -81,17 +81,16 @@ void MEMORY_CONTROLLER::operate()
           channel.RQ_ROW_BUFFER_MISS++;
 
         uint64_t page =channel.active_request->pkt->address >> LOG2_PAGE_SIZE;
-        std::string RorW = (channel.write_mode)? "Write" : "Read" ;
+        // std::string RorW = (channel.write_mode)? "Write" : "Read" ;
 
+        uint16_t RorW = (channel.write_mode)? 0 : 1 ;
         MYDP (if (warmup_complete[channel.active_request->pkt->cpu]) {
         // cout << "\"" << queue->entry[request_index].address << "\": " ;
         cout << "{ " ;
-        cout << " \"Mem\": " << "\""<< "DRAM" << "\"" ;
-        cout << ", \"Address\": " << channel.active_request->pkt->address;
-        cout << ", \"R/W\": " << "\"" << RorW << "\"";
+        cout << " \"Address\": " << channel.active_request->pkt->address;
+        cout << ", \"RorW\": " << "\"" << RorW << "\"";
         cout << ", \"Page\": " << page;
-        cout << ", \"Cycle\": " << channel.active_request->event_cycle ;
-        cout << ", \"V_addr\": " <<  channel.active_request->pkt->address<< dec << "},"<< endl; });
+        cout << ", \"Cycle\": " << channel.active_request->event_cycle << dec << "},"<< endl; });
 
 
       } else {

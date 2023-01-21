@@ -67,6 +67,8 @@ void print_roi_stats(uint32_t cpu, CACHE* cache)
 
   if (TOTAL_ACCESS > 0 && cache->NAME == "LLC") {
     cout << cache->NAME;
+    cout << " SET      " << setw(10) << cache->NUM_SET << "  WAY: " << setw(10) << cache->NUM_WAY << endl;
+    cout << cache->NAME;
     cout << " TOTAL     ACCESS: " << setw(10) << TOTAL_ACCESS << "  HIT: " << setw(10) << TOTAL_HIT << "  MISS: " << setw(10) << TOTAL_MISS << endl;
 
     cout << cache->NAME;
@@ -99,6 +101,11 @@ void print_roi_stats(uint32_t cpu, CACHE* cache)
     // (cache->total_miss_latency)/TOTAL_MISS << " cycles " <<
     // cache->total_miss_latency << "/" << TOTAL_MISS<< endl;
   }
+  // else{
+  //   cout << cache->NAME;
+  //   cout << " SET      " << setw(10) << cache->NUM_SET << "  WAY: " << setw(10) << cache->NUM_WAY << endl;
+ 
+  // }
 }
 
 void print_sim_stats(uint32_t cpu, CACHE* cache)
@@ -461,6 +468,7 @@ int main(int argc, char** argv)
         ooo_cpu[i]->finish_sim_instr = ooo_cpu[i]->num_retired - ooo_cpu[i]->begin_sim_instr;
         ooo_cpu[i]->finish_sim_cycle = ooo_cpu[i]->current_cycle - ooo_cpu[i]->begin_sim_cycle;
 
+        cout << endl ; 
         cout << "Finished CPU " << i << " instructions: " << ooo_cpu[i]->finish_sim_instr << " cycles: " << ooo_cpu[i]->finish_sim_cycle;
         cout << " cumulative IPC: " << ((float)ooo_cpu[i]->finish_sim_instr / ooo_cpu[i]->finish_sim_cycle);
         cout << " (Simulation time: " << elapsed_hour << " hr " << elapsed_minute << " min " << elapsed_second << " sec) " << endl;
@@ -508,6 +516,7 @@ int main(int argc, char** argv)
   print_branch_stats();
 #endif
 
+  cout << "vpage_count:" << vmem.vpage_count << " vpage_size: " << vmem.vpage_count*4.0 << endl;
   cout << "finish_sim_cycles: " << ooo_cpu[0]->finish_sim_cycle << endl;
   cout << "begin_sim_cycles: " << ooo_cpu[0]->begin_sim_cycle << endl;
   return 0;
