@@ -86,8 +86,9 @@ void MEMORY_CONTROLLER::operate()
         uint16_t RorW = (channel.write_mode)? 0 : 1 ;
         MYDP (if (warmup_complete[channel.active_request->pkt->cpu]) {
         // cout << "\"" << queue->entry[request_index].address << "\": " ;
+        int block_address = channel.active_request->pkt->address >> LOG2_BLOCK_SIZE;
         cout << "{ " ;
-        cout << " \"Address\": " << channel.active_request->pkt->address;
+        cout << " \"Address\": " <<  block_address;
         cout << ", \"RorW\": " << "\"" << RorW << "\"";
         cout << ", \"Page\": " << page;
         cout << ", \"Cycle\": " << channel.active_request->event_cycle << dec << "},"<< endl; });

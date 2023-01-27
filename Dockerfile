@@ -24,9 +24,8 @@ RUN useradd -m -u $UID -g $GID -o -s /bin/bash $UNAME && echo "$UNAME:U6aMy0wojr
 USER $UNAME
 
 # Set the working directory (for subsequent commands)
-# WORKDIR /home/$UNAME
+WORKDIR /home/$UNAME/Champsim_Reliability
 
-WORKDIR /cars/Champsim_Reliability
 
 CMD /bin/bash
 LABEL Name=champsim Version=0.0.1
